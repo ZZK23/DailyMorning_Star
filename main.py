@@ -128,7 +128,8 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
     love_days = str(today.__sub__(love_date)).split(" ")[0]
     
     #今年除夕
-    new_years_eve=datetime.date(2024,2,9)
+    year_eve="2024-02-09"
+    new_years_eve=datetime.datetime.strptime(year_eve,"%Y-%m-%d")
     #curr_datetime=datetime.datetime.now()
     interval=new_years_eve-today
     left_days=interval.days
