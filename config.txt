@@ -19,6 +19,8 @@
 "birthday1": {"name": "毛毛", "birthday": "r1996-03-13"},
 # 生日2
 "birthday2": {"name": "奎奎", "birthday": "r1995-09-14"},
+# 除夕
+"eve":{"name":"过年","birthday":"2024-02-09"},
 # 在一起的日子，格式同上
 "love_date": "2022-06-19"
 }
