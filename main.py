@@ -126,6 +126,14 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
     love_date = date(love_year, love_month, love_day)
     # 获取在一起的日期差
     love_days = str(today.__sub__(love_date)).split(" ")[0]
+    
+    #今年除夕
+    new_years_eve=datetime.datetime(2024,2,9)
+    curr_datetime=datetime.datetime.now()
+    interval=new_years_eve-curr_datetime
+    left_days=interval.days
+    
+    
     # 获取所有生日数据
     birthdays = {}
     for k, v in config.items():
@@ -159,6 +167,10 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
             },
             "love_day": {
                 "value": love_days,
+                "color": get_color()
+            },
+            "left_days": {
+                "value": left_days,
                 "color": get_color()
             },
             "note_en": {
