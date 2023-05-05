@@ -132,7 +132,7 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
     curr_datetime=datetime.now()
     interval=new_years_eve - curr_datetime
     left_days=interval.days
-    
+   
     
     # 获取所有生日数据
     birthdays = {}
