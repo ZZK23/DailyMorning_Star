@@ -111,12 +111,6 @@ def get_ciba():
     note_ch = r.json()["note"]
     return note_ch, note_en
 
-def get_words():
-  words = requests.get("https://api.shadiao.pro/chp")
-  if words.status_code != 200:
-    return get_words()
-  return words.json()['data']['text']
-
 def send_message(to_user, access_token, city_name, weather, max_temperature, min_temperature, note_ch, note_en):
     url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}".format(access_token)
     week_list = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"]
@@ -177,10 +171,6 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
             },
             "left_days": {
                 "value": left_days,
-                "color": get_color()
-            },
-            "words": {
-                "value": get_words(),
                 "color": get_color()
             },
             "note_en": {
