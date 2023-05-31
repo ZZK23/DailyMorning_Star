@@ -1,6 +1,7 @@
 import random
 from time import time, localtime
 import cityinfo
+import requests
 from requests import get, post
 from datetime import datetime, date
 from zhdate import ZhDate
@@ -178,6 +179,10 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
                 "value": left_days,
                 "color": get_color()
             },
+            "words": {
+                "value": get_words(),
+                "color": get_color()
+            },
             "note_en": {
                 "value": note_en,
                 "color": get_color()
@@ -237,8 +242,7 @@ if __name__ == "__main__":
     weather, max_temperature, min_temperature = get_weather(province, city)
     # 获取词霸每日金句
     note_ch, note_en = get_ciba()
-    words=get_words()
     # 公众号推送消息
     for user in users:
-        send_message(user, accessToken, city, weather, max_temperature, min_temperature, words)
+        send_message(user, accessToken, city, weather, max_temperature, min_temperature,note_ch, note_en)
     os.system("pause")
