@@ -25,7 +25,7 @@ def get_access_token():
     post_url = ("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}"
                 .format(app_id, app_secret))
     try:
-        access_token = get(post_url).json()['access_token']
+        access_token = get(post_url, timeout=15).json()['access_token']
     except KeyError:
         print("获取access_token失败，请检查app_id和app_secret是否正确")
         os.system("pause")
@@ -51,7 +51,7 @@ def get_weather(province, city):
                       'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
     }
     url = "http://d1.weather.com.cn/dingzhi/{}.html?_={}".format(city_id, t)
-    response = get(url, headers=headers)
+    response = get(url, headers=headers, timeout=15)
     response.encoding = "utf-8"
     response_data = response.text.split(";")[0].split("=")[-1]
     response_json = eval(response_data)
@@ -100,18 +100,7 @@ def get_birthday(birthday, year, today):
     return birth_day
 
 
-def get_ciba():
-    url = "https://open.iciba.com/dsapi/"
-    headers = {
-        'Content-Type': 'application/json',
-        'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"
-    }
-    response = requests.get(url, headers=headers)
-    data = response.json()
-
-    note_en = data["content"]
-    note_ch = data["note"]
-
+def _split_note(note_en, note_ch):
     if len(note_en) > 20:
         note_en2 = note_en[20:]
         note_en = note_en[:20]
@@ -125,6 +114,33 @@ def get_ciba():
         note_ch2 = ""
 
     return note_ch, note_ch2, note_en, note_en2
+
+
+def get_ciba():
+    """获取每日金句：优先词霸接口，失败时自动降级到一言API，再失败用兜底文案，保证不阻断推送。"""
+    try:
+        url = "https://open.iciba.com/dsapi/"
+        headers = {
+            'Content-Type': 'application/json',
+            'User-Agent': "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"
+        }
+        response = requests.get(url, headers=headers, timeout=10)
+        data = response.json()
+        print("词霸金句获取成功")
+        return _split_note(data["content"], data["note"])
+    except Exception as e:
+        print("词霸金句接口异常，降级到一言API:", type(e).__name__, e)
+
+    try:
+        r = requests.get("https://v1.hitokoto.cn/?c=d&c=e&c=i&encode=json", timeout=10)
+        d = r.json()
+        note_en = d.get("hitokoto", "")
+        note_ch = d.get("from", "每日一句")
+        print("一言API获取成功")
+        return _split_note(note_en, note_ch)
+    except Exception as e:
+        print("一言API也异常，使用兜底文案:", type(e).__name__, e)
+        return _split_note("Stay hungry, stay foolish.", "今天也要元气满满哦！")
 
 
 def send_message(to_user, access_token, city_name, weather, max_temperature, min_temperature, note_ch, note_ch2,
@@ -211,7 +227,7 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                       'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
     }
-    response = post(url, headers=headers, json=data).json()
+    response = post(url, headers=headers, json=data, timeout=15).json()
     if response["errcode"] == 40037:
         print("推送消息失败，请检查模板id是否正确")
     elif response["errcode"] == 40036:
